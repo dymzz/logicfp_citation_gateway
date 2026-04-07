@@ -1,0 +1,34 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Project specific - data files (but keep directory structure)
+data/sessions/*.json
+data/citations/**/*.json
+data/contexts/*.json
+
+# Logs and temporary
+*.log
+logs/
+.tmp/
+temp/
