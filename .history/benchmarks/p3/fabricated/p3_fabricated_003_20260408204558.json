@@ -1,0 +1,30 @@
+{
+    "case_id": "p3_fabricated_003",
+    "description": "mixed real reference and multiple fabricated references",
+    "category": "fabricated",
+    "context_pool": {
+        "pool_id": "pool_10",
+        "members": [
+            {
+                "member_id": "doc_1",
+                "source_id": "source_a",
+                "content": "This is document 1."
+            }
+        ]
+    },
+    "llm_output": "依据 [ref:doc_1]，并伪造 [ref:fake:made_up_doc_a] 与 [ref:fake:made_up_doc_b]",
+    "expected": {
+        "reference_integrity_status": "fabricated",
+        "resolved_members": [
+            "doc_1"
+        ],
+        "unresolved_members": [
+            "[ref:fake:made_up_doc_a]",
+            "[ref:fake:made_up_doc_b]"
+        ],
+        "outside_pool_references": [],
+        "triggers": [
+            "fabricated_reference_detected"
+        ]
+    }
+}

@@ -1,0 +1,29 @@
+{
+    "case_id": "p3_unresolved_003",
+    "description": "multiple malformed references remain unresolved",
+    "category": "unresolved",
+    "context_pool": {
+        "pool_id": "pool_8",
+        "members": [
+            {
+                "member_id": "doc_1",
+                "source_id": "source_a",
+                "content": "This is document 1."
+            }
+        ]
+    },
+    "llm_output": "损坏引用一 [ref:broken_a\n损坏引用二 [ref:broken_b",
+    "expected": {
+        "reference_integrity_status": "unresolved",
+        "resolved_members": [],
+        "unresolved_members": [
+            "[ref:broken_a",
+            "[ref:broken_b"
+        ],
+        "outside_pool_references": [],
+        "triggers": [
+            "reference_parse_failed",
+            "unresolved_reference_pointer"
+        ]
+    }
+}

@@ -1,0 +1,23 @@
+{
+    "case_id": "p3_clean_004",
+    "description": "no explicit references remains clean",
+    "category": "clean",
+    "context_pool": {
+        "pool_id": "pool_11",
+        "members": [
+            {
+                "member_id": "doc_1",
+                "source_id": "source_a",
+                "content": "This is document 1."
+            }
+        ]
+    },
+    "llm_output": "这段输出没有显式引用，只是普通说明文本。",
+    "expected": {
+        "reference_integrity_status": "clean",
+        "resolved_members": [],
+        "unresolved_members": [],
+        "outside_pool_references": [],
+        "triggers": []
+    }
+}

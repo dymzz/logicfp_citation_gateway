@@ -1,0 +1,29 @@
+{
+    "case_id": "p3_fabricated_002",
+    "description": "one valid reference and one explicit fabricated reference",
+    "category": "fabricated",
+    "context_pool": {
+        "pool_id": "pool_5",
+        "members": [
+            {
+                "member_id": "doc_1",
+                "source_id": "source_a",
+                "content": "This is document 1."
+            }
+        ]
+    },
+    "llm_output": "依据 [ref:doc_1]，并伪造引用 [ref:fake:made_up_doc]",
+    "expected": {
+        "reference_integrity_status": "fabricated",
+        "resolved_members": [
+            "doc_1"
+        ],
+        "unresolved_members": [
+            "[ref:fake:made_up_doc]"
+        ],
+        "outside_pool_references": [],
+        "triggers": [
+            "fabricated_reference_detected"
+        ]
+    }
+}

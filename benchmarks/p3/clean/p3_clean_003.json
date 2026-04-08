@@ -1,0 +1,32 @@
+{
+    "case_id": "p3_clean_003",
+    "description": "duplicate reference to same member remains clean",
+    "category": "clean",
+    "context_pool": {
+        "pool_id": "pool_6",
+        "members": [
+            {
+                "member_id": "doc_1",
+                "source_id": "source_a",
+                "content": "This is document 1."
+            },
+            {
+                "member_id": "doc_2",
+                "source_id": "source_b",
+                "content": "This is document 2."
+            }
+        ]
+    },
+    "llm_output": "先引用 [ref:doc_2]，再重复引用 [ref:doc_2]，最后引用 [ref:doc_1]",
+    "expected": {
+        "reference_integrity_status": "clean",
+        "resolved_members": [
+            "doc_2",
+            "doc_2",
+            "doc_1"
+        ],
+        "unresolved_members": [],
+        "outside_pool_references": [],
+        "triggers": []
+    }
+}

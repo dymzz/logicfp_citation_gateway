@@ -1,0 +1,30 @@
+{
+    "case_id": "p3_unresolved_004",
+    "description": "all references are id_not_found",
+    "category": "unresolved",
+    "context_pool": {
+        "pool_id": "pool_13",
+        "members": [
+            {
+                "member_id": "doc_1",
+                "source_id": "source_a",
+                "content": "This is document 1."
+            }
+        ]
+    },
+    "llm_output": "引用 [ref:missing_1]、[ref:missing_2] 和 [ref:missing_3]",
+    "expected": {
+        "reference_integrity_status": "unresolved",
+        "resolved_members": [],
+        "unresolved_members": [
+            "[ref:missing_1]",
+            "[ref:missing_2]",
+            "[ref:missing_3]"
+        ],
+        "outside_pool_references": [],
+        "triggers": [
+            "reference_member_not_found",
+            "unresolved_reference_pointer"
+        ]
+    }
+}

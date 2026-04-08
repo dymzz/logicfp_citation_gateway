@@ -1,0 +1,485 @@
+# P3 Benchmark 样本编写规范与 Case 模板
+
+## 6.1 本章目标
+
+本章用于统一 P3 benchmark 样本的编写方式，解决以下问题：
+
+1. 什么样的 case 才算合格的 P3 样本；
+2. case 应按什么格式落盘；
+3. 编写新样本时必须遵守哪些约束；
+4. 如何保证样本长期可回归、可维护、可扩展。
+
+本章不是重新定义 P3 的判定规则。  
+本章只负责一件事：
+
+**把已经冻结的判定规则，稳定地写成可执行、可回归、可审查的 benchmark 样本。**
+
+---
+
+## 6.2 适用范围
+
+本章仅适用于 P3 以下范围：
+
+- 引用解析；
+- 引用归属；
+- 池内 / 池外判定；
+- `clean / partial / unresolved / outside_pool / fabricated` 等状态回归；
+- 与 `resolved_members / unresolved_members / outside_pool_references / triggers` 相关的样本结构。
+
+本章不适用于：
+
+- P2 语义支持评测；
+- 主程序最终 `DecisionResult` 评测；
+- 行业专项规则样本；
+- LLM 主观质量评测；
+- 用户体验类 case；
+- 业务流程审批类 case。
+
+---
+
+## 6.3 样本编写总原则（冻结）
+
+### 6.3.1 一条 case 只验证一个核心边界
+
+每条 case 应尽量聚焦一个主要目标。  
+不要在同一条 case 里同时塞入过多变量，否则失败后难以定位。
+
+例如：
+
+- 好 case：验证单个合法引用是否能命中 pool；
+- 好 case：验证单个明确池外引用是否能落入 `outside_pool`；
+- 坏 case：同一条样本里同时混入合法引用、池外引用、格式错误、fabricated、业务规则。
+
+允许存在混合 case，但必须明确写清：
+
+- 主验证目标是什么；
+- 次要现象只是陪衬，不是本条 case 的判断核心。
+
+### 6.3.2 case 必须人工可读、可判
+
+任何一个 case，工程同事在**不运行代码**的情况下，也应能快速看出：
+
+- 当前 pool 里有什么；
+- 输出里引用了什么；
+- 预期为什么是这个状态。
+
+如果一条 case 需要长篇解释才能理解，说明 case 设计过于复杂。
+
+### 6.3.3 case 必须最小化
+
+每条样本只保留判定所需的最小信息：
+
+- 最小 `context_pool`
+- 最小 `llm_output`
+- 最小 `expected`
+
+不要加入与当前判定无关的：
+
+- 长篇内容；
+- 冗余 metadata；
+- 复杂业务背景；
+- 多余上下文字段。
+
+### 6.3.4 expected 必须先于实现存在
+
+编写样本时，应先写清楚 `expected`，再跑代码。  
+不允许先看当前实现输出，再反过来写 expected。
+
+否则 benchmark 会从“验证设计”退化为“迎合现状”。
+
+---
+
+## 6.4 样本文件组织规范
+
+建议 P3 benchmark 样本使用独立目录，并按状态分类存放。
+
+推荐目录结构如下：
+
+```text
+benchmarks/
+└── p3/
+    ├── manifest.json
+    ├── clean/
+    │   ├── p3_clean_001.json
+    │   ├── p3_clean_002.json
+    │   └── ...
+    ├── partial/
+    │   ├── p3_partial_001.json
+    │   └── ...
+    ├── unresolved/
+    │   ├── p3_unresolved_001.json
+    │   └── ...
+    ├── outside_pool/
+    │   ├── p3_outside_pool_001.json
+    │   └── ...
+    └── fabricated/
+        ├── p3_fabricated_001.json
+        └── ...
+```
+这样做的好处是：
+
+样本类别天然清晰；
+回归失败后容易按目录定位；
+不会把不同状态混在一个目录里难以维护；
+方便统计每类样本数量；
+便于后续扩展边界样本、异常样本、混合样本子集。
+
+6.5 单条 case 的最小字段结构（冻结）
+
+建议每条样本统一为以下 JSON 结构：
+```json
+{
+  "case_id": "p3_clean_001",
+  "description": "single valid reference inside pool",
+  "category": "clean",
+  "context_pool": {
+    "pool_id": "pool_1",
+    "members": [
+      {
+        "member_id": "doc_1",
+        "source_id": "source_a",
+        "content": "This is document 1."
+      }
+    ]
+  },
+  "llm_output": "结论来自 [ref:doc_1]",
+  "expected": {
+    "reference_integrity_status": "clean",
+    "resolved_members": ["doc_1"],
+    "unresolved_members": [],
+    "outside_pool_references": [],
+    "triggers": []
+  }
+}
+```
+6.6 字段说明（冻结）
+6.6.1 case_id
+
+样本唯一标识。
+必须全局唯一、长期稳定、可用于回归追踪。
+
+6.6.2 description
+
+对样本意图的简短描述。
+建议写成一句可读英文或中文短句，说明“这条 case 在测什么”。
+
+6.6.3 category
+
+样本所属主类别。
+当前冻结为：
+
+clean
+partial
+unresolved
+outside_pool
+fabricated
+6.6.4 context_pool
+
+当前轮允许引用的合法上下文成员集合。
+其结构必须与 P3 正式输入 contract 一致。
+
+6.6.5 llm_output
+
+待检测的最终输出文本。
+必须是单条样本真正要送入 P3 的文本，而不是注释、说明或伪代码。
+
+6.6.6 expected
+
+样本真值。
+至少必须包含：
+
+reference_integrity_status
+
+建议同时包含：
+
+resolved_members
+unresolved_members
+outside_pool_references
+triggers
+6.7 字段编写约束
+6.7.1 case_id 约束
+
+建议命名为：
+
+p3_<category>_<serial>
+
+例如：
+
+p3_clean_001
+p3_partial_001
+p3_unresolved_001
+p3_outside_pool_001
+p3_fabricated_001
+
+不建议把 case_id 写成长句或描述文本本身。
+
+6.7.2 description 约束
+
+描述要短、准、可读。
+不要写成长段落，不要夹带设计讨论。
+
+推荐写法：
+
+single valid reference inside pool
+one valid reference and one missing reference
+explicit outside pool reference
+6.7.3 category 约束
+
+category 必须与 expected.reference_integrity_status 主状态一致。
+不能出现：
+
+category = clean 但 expected 是 outside_pool
+category = fabricated 但 expected 是 partial
+6.7.4 context_pool 约束
+
+context_pool 必须最小化，只保留当前判定所需成员。
+不要为了“更像真实场景”而塞入大量无关成员。
+
+6.7.5 llm_output 约束
+
+输出文本必须只包含本条样本所需最小内容。
+不要在一条小样本里放入很长段落，降低可读性。
+
+6.7.6 expected 约束
+
+expected 必须明确、冻结、可人工判定。
+禁止出现模糊词，例如：
+
+maybe_partial
+probably_unresolved
+almost_clean
+
+真值必须是冻结枚举之一。
+
+6.8 五类标准模板（冻结）
+6.8.1 Clean 模板
+```json
+{
+  "case_id": "p3_clean_001",
+  "description": "single valid reference inside pool",
+  "category": "clean",
+  "context_pool": {
+    "pool_id": "pool_1",
+    "members": [
+      {
+        "member_id": "doc_1",
+        "source_id": "source_a",
+        "content": "This is document 1."
+      }
+    ]
+  },
+  "llm_output": "结论来自 [ref:doc_1]",
+  "expected": {
+    "reference_integrity_status": "clean",
+    "resolved_members": ["doc_1"],
+    "unresolved_members": [],
+    "outside_pool_references": [],
+    "triggers": []
+  }
+}
+```
+6.8.2 Partial 模板
+```json
+{
+  "case_id": "p3_partial_001",
+  "description": "one valid reference and one missing reference",
+  "category": "partial",
+  "context_pool": {
+    "pool_id": "pool_1",
+    "members": [
+      {
+        "member_id": "doc_1",
+        "source_id": "source_a",
+        "content": "This is document 1."
+      }
+    ]
+  },
+  "llm_output": "依据 [ref:doc_1] 和 [ref:missing_9]",
+  "expected": {
+    "reference_integrity_status": "partial",
+    "resolved_members": ["doc_1"],
+    "unresolved_members": ["[ref:missing_9]"],
+    "outside_pool_references": [],
+    "triggers": [
+      "unresolved_reference_pointer",
+      "reference_member_not_found"
+    ]
+  }
+}
+```
+6.8.3 Unresolved 模板
+```json
+{
+  "case_id": "p3_unresolved_001",
+  "description": "all references cannot be resolved",
+  "category": "unresolved",
+  "context_pool": {
+    "pool_id": "pool_1",
+    "members": [
+      {
+        "member_id": "doc_1",
+        "source_id": "source_a",
+        "content": "This is document 1."
+      }
+    ]
+  },
+  "llm_output": "依据 [ref:missing_9]",
+  "expected": {
+    "reference_integrity_status": "unresolved",
+    "resolved_members": [],
+    "unresolved_members": ["[ref:missing_9]"],
+    "outside_pool_references": [],
+    "triggers": [
+      "unresolved_reference_pointer",
+      "reference_member_not_found"
+    ]
+  }
+}
+```
+```json
+6.8.4 Outside Pool 模板
+{
+  "case_id": "p3_outside_pool_001",
+  "description": "explicit outside pool reference",
+  "category": "outside_pool",
+  "context_pool": {
+    "pool_id": "pool_1",
+    "members": [
+      {
+        "member_id": "doc_1",
+        "source_id": "source_a",
+        "content": "This is document 1."
+      }
+    ]
+  },
+  "llm_output": "引用池外对象 [ref:outside:secret_doc]",
+  "expected": {
+    "reference_integrity_status": "outside_pool",
+    "resolved_members": [],
+    "unresolved_members": [],
+    "outside_pool_references": ["outside:secret_doc"],
+    "triggers": [
+      "citation_outside_context_pool"
+    ]
+  }
+}
+```
+6.8.5 Fabricated 模板
+```json
+{
+  "case_id": "p3_fabricated_001",
+  "description": "explicit fabricated reference",
+  "category": "fabricated",
+  "context_pool": {
+    "pool_id": "pool_1",
+    "members": [
+      {
+        "member_id": "doc_1",
+        "source_id": "source_a",
+        "content": "This is document 1."
+      }
+    ]
+  },
+  "llm_output": "伪造引用 [ref:fake:made_up_doc]",
+  "expected": {
+    "reference_integrity_status": "fabricated",
+    "resolved_members": [],
+    "unresolved_members": ["[ref:fake:made_up_doc]"],
+    "outside_pool_references": [],
+    "triggers": [
+      "fabricated_reference_detected"
+    ]
+  }
+}
+```
+6.9 推荐的 manifest 结构
+
+建议在 benchmarks/p3/manifest.json 中维护样本清单，便于统计和校验。
+
+示例：
+```json
+{
+  "benchmark_name": "p3_reference_integrity",
+  "benchmark_version": "v1",
+  "categories": {
+    "clean": 5,
+    "partial": 5,
+    "unresolved": 5,
+    "outside_pool": 5,
+    "fabricated": 5
+  },
+  "total_cases": 25
+}
+```
+这个文件的作用包括：
+
+做覆盖率检查；
+做版本记录；
+防止某类样本被不小心删空；
+让回归执行器可以先做清单校验，再逐条执行；
+让 benchmark 版本和样本数量变化有迹可循
+
+6.10 新增 case 的编写流程（建议冻结）
+
+建议新增单条 case 时固定遵循以下流程：
+
+先确定这条 case 的主验证边界；
+再选最小 context_pool；
+再写最小 llm_output；
+再手写 expected；
+最后才运行执行器验证；
+若实现结果与 expected 不一致，先检查设计口径，再决定改代码还是改样本。
+
+不允许倒过来：
+
+先跑实现；
+看输出是什么；
+再把 expected 改成实现输出。
+6.11 推荐的边界样本类型
+
+为了防止样本过于单薄，建议每个类别内部至少包含以下两层：
+
+6.11.1 基础样本
+
+验证最直接、最干净、最容易人工判定的路径。
+
+例如：
+
+单个合法引用；
+单个缺失引用；
+单个明确池外引用；
+单个明确 fabricated 引用。
+6.11.2 边界样本
+
+验证容易在版本升级、parser 增强、实现改写时发生漂移的路径。
+
+例如：
+
+多引用混合路径；
+重复引用；
+引用顺序变化；
+同类 trigger 的不同文本表现形式；
+“看起来像 unresolved，但其实是 fabricated”的边界路径。
+6.12 Case 编写禁止项（冻结）
+6.12.1 禁止把多重目标塞进一条 case
+
+不要在一条 case 中同时验证：
+
+parse_failed
+outside_pool
+fabricated
+partial
+业务规则
+主程序策略
+
+除非该样本明确就是“混合边界样本”，且在 description 中写清主验证目标。
+
+6.12.2 禁止使用模糊真值
+
+错误写法：
+```json
+{
+  "expected": {
+    "reference_integrity_status": "maybe_partial"
+  }
+}

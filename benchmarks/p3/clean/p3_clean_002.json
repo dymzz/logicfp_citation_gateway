@@ -1,0 +1,31 @@
+{
+    "case_id": "p3_clean_002",
+    "description": "two valid references inside pool",
+    "category": "clean",
+    "context_pool": {
+        "pool_id": "pool_2",
+        "members": [
+            {
+                "member_id": "doc_1",
+                "source_id": "source_a",
+                "content": "This is document 1."
+            },
+            {
+                "member_id": "doc_2",
+                "source_id": "source_b",
+                "content": "This is document 2."
+            }
+        ]
+    },
+    "llm_output": "依据 [ref:doc_1] 和 [ref:doc_2]",
+    "expected": {
+        "reference_integrity_status": "clean",
+        "resolved_members": [
+            "doc_1",
+            "doc_2"
+        ],
+        "unresolved_members": [],
+        "outside_pool_references": [],
+        "triggers": []
+    }
+}

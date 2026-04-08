@@ -1,0 +1,12 @@
+{
+    "benchmark_name": "p3_reference_integrity",
+    "benchmark_version": "v1",
+    "categories": {
+        "clean": 1,
+        "partial": 1,
+        "unresolved": 1,
+        "outside_pool": 1,
+        "fabricated": 1
+    },
+    "total_cases": 5
+}

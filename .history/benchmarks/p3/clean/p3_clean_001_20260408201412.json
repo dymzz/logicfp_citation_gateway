@@ -1,0 +1,25 @@
+{
+    "case_id": "p3_clean_001",
+    "description": "single valid reference inside pool",
+    "category": "clean",
+    "context_pool": {
+        "pool_id": "pool_1",
+        "members": [
+            {
+                "member_id": "doc_1",
+                "source_id": "source_a",
+                "content": "This is document 1."
+            }
+        ]
+    },
+    "llm_output": "结论来自 [ref:doc_1]",
+    "expected": {
+        "reference_integrity_status": "clean",
+        "resolved_members": [
+            "doc_1"
+        ],
+        "unresolved_members": [],
+        "outside_pool_references": [],
+        "triggers": []
+    }
+}

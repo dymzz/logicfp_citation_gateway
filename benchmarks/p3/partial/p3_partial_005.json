@@ -1,0 +1,32 @@
+{
+    "case_id": "p3_partial_005",
+    "description": "one valid reference plus one missing and one malformed reference",
+    "category": "partial",
+    "context_pool": {
+        "pool_id": "pool_17",
+        "members": [
+            {
+                "member_id": "doc_1",
+                "source_id": "source_a",
+                "content": "This is document 1."
+            }
+        ]
+    },
+    "llm_output": "依据 [ref:doc_1]，缺失引用 [ref:missing_1]，以及损坏引用 [ref:broken_doc",
+    "expected": {
+        "reference_integrity_status": "partial",
+        "resolved_members": [
+            "doc_1"
+        ],
+        "unresolved_members": [
+            "[ref:broken_doc",
+            "[ref:missing_1]"
+        ],
+        "outside_pool_references": [],
+        "triggers": [
+            "reference_parse_failed",
+            "unresolved_reference_pointer",
+            "reference_member_not_found"
+        ]
+    }
+}

@@ -1,0 +1,28 @@
+{
+    "case_id": "p3_unresolved_002",
+    "description": "malformed reference cannot be parsed",
+    "category": "unresolved",
+    "context_pool": {
+        "pool_id": "pool_3",
+        "members": [
+            {
+                "member_id": "doc_1",
+                "source_id": "source_a",
+                "content": "This is document 1."
+            }
+        ]
+    },
+    "llm_output": "损坏引用 [ref:broken_doc",
+    "expected": {
+        "reference_integrity_status": "unresolved",
+        "resolved_members": [],
+        "unresolved_members": [
+            "[ref:broken_doc"
+        ],
+        "outside_pool_references": [],
+        "triggers": [
+            "reference_parse_failed",
+            "unresolved_reference_pointer"
+        ]
+    }
+}

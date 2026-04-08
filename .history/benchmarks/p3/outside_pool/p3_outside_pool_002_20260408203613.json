@@ -1,0 +1,29 @@
+{
+    "case_id": "p3_outside_pool_002",
+    "description": "one valid reference and one explicit outside pool reference",
+    "category": "outside_pool",
+    "context_pool": {
+        "pool_id": "pool_4",
+        "members": [
+            {
+                "member_id": "doc_1",
+                "source_id": "source_a",
+                "content": "This is document 1."
+            }
+        ]
+    },
+    "llm_output": "依据 [ref:doc_1]，另引用池外对象 [ref:outside:secret_doc]",
+    "expected": {
+        "reference_integrity_status": "outside_pool",
+        "resolved_members": [
+            "doc_1"
+        ],
+        "unresolved_members": [],
+        "outside_pool_references": [
+            "outside:secret_doc"
+        ],
+        "triggers": [
+            "citation_outside_context_pool"
+        ]
+    }
+}
